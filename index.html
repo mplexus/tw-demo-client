@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="twDemoClient">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700' rel='stylesheet' type='text/css'>
+  <title>Tora Checkout local</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      font-family: 'Open Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+    }
+
+    .button-section {
+      margin: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px dashed lightgrey;
+    }
+
+    .button-section-part {
+      padding: 10px;
+      background-color: #eee;
+      display: inline-block;
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+
+    .button-section h3 {
+      margin: 3px 0px 5px 0px;
+    }
+
+    .button-section p {
+      margin: 3px 0px 15px 0px;
+    }
+
+    .title, .subtitle {
+      margin: 5px 20px;
+    }
+
+    .error {
+      padding: 20px;
+      background-color: pink;
+    }
+  </style>
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="configfile.js"></script>
+  <script src="app.js"></script>
+</head>
+
+<body ng-controller="MainController">
+  <header>
+    <h1 class="title">Imaginary Shop</h1>
+  </header>
+  <hr>
+  <section>
+    <h2 class="subtitle">Tora Checkout local</h2>
+
+    <div class="button-section" ng-switch on="error">
+      <div>
+        <div class="button-section-part">
+          <label>Environment</label>
+          <select ng-model='environment' ng-change='selectEnvironment()'>
+            <option value=''>Select an environment</option>
+            <option ng-repeat="(key, env) in availableEnvironments" value="{{::key}}">{{::env.LABEL}}</option>
+          </select>
+        </div>
+        <div class="button-section-part">
+          <label>Merchant</label>
+          <select onchange="selectMerchant(this)">
+            <option ng-repeat="merchant in merchants" value="{{merchant.id}}">{{merchant.name | limitTo: 30}} {{merchant.legal_title && ('- ' + (merchant.legal_title | limitTo: 30))}}</option>
+          </select>
+        </div>
+        <div class="button-section-part">
+          <label>Amount</label>
+          <input type="text" class="form-control" id="amount-input" placeholder="Ποσό κατάθεσης" aria-label="..." onchange="addAmount(this.value)">
+        </div>
+      </div>
+      <div ng-switch-when="true" class="error">
+        {{errorMessage}}
+      </div>
+    </div>
+
+    <div class="button-section">
+      <h3>Case 1</h3>
+      <p>Only <strong>credit card.</strong></p>
+      <form action="http://localhost:3000/submitForm/" id="form-1" method="POST">
+        <!--has pk for 3ds-->
+        <span class="trw-button" data-form-id="form-1" data-key="pk_PXoZnfpfRTM44HftM786aoC6hWkudhbE" data-amount="250" data-name="Pame Stoixima"
+          data-description="This is an awesome description" data-locale="en" data-card="true" data-paysafe="false" data-skrill="false"
+          data-image="./assets/images/stoixima_square.png"></span>
+      </form>
+    </div>
+
+    <div class="button-section">
+      <h3>Case 2</h3>
+      <p><strong>Credit card</strong> and <strong>paysafe card.</strong></p>
+      <form action="/whatTheFunk" id="form-2">
+        <span class="trw-button" data-key="pk_PXoZnfpfRTM44HftM786aoC6hWkudhbE" data-amount="250" data-name="Kotsovolos" data-description="This is a second description"
+          data-locale="en" data-card="true" data-paysafe="true" data-skrill="false" data-callback="test"></span>
+      </form>
+    </div>
+
+    <div class="button-section">
+      <h3>Case 3</h3>
+      <p><strong>Credit card</strong>, <strong>paysafe card</strong>, <strong>skrill</strong> and <strong>i-bank pay</strong>.</p>
+      <form action="http://localhost:3000/submitForm/" id="form-3" method="POST">
+        <span class="trw-button"
+          data-key="pk_PXoZnfpfRTM44HftM786aoC6hWkudhbE"
+          data-amount="875"
+          data-name="Pame Stoixima"
+          data-description="Bet-customer55-o96550"
+          data-locale="en"
+          data-card="true"
+          data-paysafe="true"
+          data-skrill="true"
+          data-ibankpay="true"
+          data-callback="test"
+          data-skrill-email="minas.kitsos@payzone.gr"
+          data-merchant-reference="whosafraidofhtebigbadwolf2678"
+          ></span>
+      </form>
+    </div>
+
+    <div class="button-section" id="case_four">
+      <h3>Case 4</h3>
+      <p><strong>Generate buttons on demand</strong></p>
+      <span>
+      a new "placeholder" element for new button will be present in a few seconds ...<strong><span id="timer"></span></strong>
+      </span>
+      <br/>
+      <script type="text/javascript">
+        var _timer = 0;
+        var _interval = setInterval(function() {
+          var timer = document.getElementById("timer");
+          timer.innerHTML = _timer;
+          _timer = +_timer + 1;
+        }, 1000);
+        setTimeout(function() {
+          var newButton = document.createElement('span');
+          newButton.className = 'trw-button';
+          newButton.dataset.key = 'pk_PXoZnfpfRTM44HftM786aoC6hWkudhbE';
+          newButton.dataset.amount = '100';
+          newButton.dataset.name = 'you \'ve got a going on!';
+          newButton.dataset.locale = 'el';
+          newButton.dataset.card = 'true';
+          newButton.dataset.formId = 'case_four_form';
+          var case_four = document.getElementById("case_four");
+          case_four.appendChild(newButton);
+          clearInterval(_interval);
+          document.getElementById("timer").innerHTML = "OK";
+          document.getElementById("btn_generate_on_demand").disabled = false;
+        }, 4000);
+      </script>
+      <input type="button" value="generate" onclick="CheckoutIFrame().generateButtons();" disabled="disabled" id="btn_generate_on_demand"/>
+      <br/>
+    </div>
+
+    <div class="button-section">
+      <h3>Case 5</h3>
+      <p>Only <strong>skrill</strong> without skrill email.</p>
+      <form action="http://localhost:3000/submitForm/" id="form-5" method="POST">
+        <span class="trw-button"
+          data-key="pk_PXoZnfpfRTM44HftM786aoC6hWkudhbE"
+          data-amount="275"
+          data-name="Pame Stoixima"
+          data-description="Bet-customer55-o96550"
+          data-locale="en"
+          data-skrill="true"
+          data-callback="test"
+          ></span>
+      </form>
+    </div>
+
+    <div class="button-section">
+      <h3>Case 6</h3>
+      <p>Only <strong>skrill</strong> with skrill email.</p>
+      <form action="http://localhost:3000/submitForm/" id="form-6" method="POST">
+        <span class="trw-button"
+          data-key="pk_PXoZnfpfRTM44HftM786aoC6hWkudhbE"
+          data-amount="175"
+          data-name="Pame Stoixima"
+          data-description="Bet-customer55-o96550"
+          data-locale="en"
+          data-skrill="true"
+          data-callback="test"
+          data-skrill-email="minas.kitsos@payzone.gr"
+          ></span>
+      </form>
+    </div>
+
+    <div class="button-section">
+      <h3>Case 7</h3>
+      <p><strong>Prefilled with customer's card and skrill email</strong>.</p>
+      <div style="font-size:small;">
+        <strong>Customer card:</strong><br/>
+        ID: ccr_TYsl89WygpsgJBBaQOlIc0uJ<br/>
+        BIN: 52061<br/>
+        Holder name: LEONIDAS MAT<br/>
+        Last four digits: 7502<br/>
+        Expiration month: 01<br/>
+        Expiration year: 2020<br/>
+      </div>
+      <br/>
+      <form action="http://localhost:3000/submitForm" id="form-7" method="POST">
+        <span class="trw-button"
+        data-key="pk_PXoZnfpfRTM44HftM786aoC6hWkudhbE"
+        data-amount="600"
+        data-name="Pame Stoixima"
+        data-description="Order id: #we1300067"
+        data-locale="el"
+        data-paysafe="true"
+        data-skrill="true"
+        data-skrill-email="ninoslav@gmail.com"
+        data-image="./assets/images/stoixima_square.png"
+        data-error-callback="errTest"
+        data-callback="test"
+        data-card="true"
+        data-cust-card-id="ccr_TYsl89WygpsgJBBaQOlIc0uJ"
+        data-cust-card-bin="520611"
+        data-cust-card-name="LEONIDAS MAT"
+        data-cust-card-last4="7502"
+        data-cust-card-exp-month="01"
+        data-cust-card-exp-year="2020">
+        </span>
+      </form>
+    </div>
+
+    <div class="button-section">
+      <h3>Case 8</h3>
+      <p><strong>Prefilled with customer's card without skrill email</strong>.</p>
+      <div style="font-size:small;">
+        <strong>Customer card:</strong><br/>
+        ID: ccr_TYsl89WygpsgJBBaQOlIc0uJ<br/>
+        BIN: 52061<br/>
+        Holder name: LEONIDAS MAT<br/>
+        Last four digits: 7502<br/>
+        Expiration month: 01<br/>
+        Expiration year: 2020<bCase 1r/>
+      </div>
+      <br/>
+      <form action="http://localhost:3000/submitForm" id="form-8" method="POST">
+        <span class="trw-button"
+        data-key="pk_PXoZnfpfRTM44HftM786aoC6hWkudhbE"
+        data-amount="600"
+        data-name="Pame Stoixima"
+        data-description="Order id: #we1300067"
+        data-locale="el"
+        data-paysafe="true"
+        data-skrill="true"
+        data-image="./assets/images/stoixima_square.png"
+        data-error-callback="errTest"
+        data-callback="test"
+        data-card="true"
+        data-cust-card-id="ccr_GifQascWoiIGlCrC9dDtAU2S"
+        data-cust-card-bin="520614"
+        data-cust-card-name="LEONIDAS MAT"
+        data-cust-card-last4="7502"
+        data-cust-card-exp-month="01"
+        data-cust-card-exp-year="2020"
+        data-merchant-reference="_____#@$@#$">
+        </span>
+      </form>
+    </div>
+  </section>
+
+  <script src="http://button.torawallet.gr/dev/checkout.js"></script>
+
+  <script>
+    function test(token) {
+      console.log('Callback function called with token: ', token);
+    }
+    function errTest(data) {
+      console.log('Error ', data);
+    }
+
+    function selectMerchant(obj) {
+      var public_key = obj.value;
+      var button = document.getElementsByClassName('trw-button-active');
+      for(var i=0; i< button.length; i++) {
+        button[i].setAttribute('data-key', public_key);
+      }
+    }
+
+    //function selectEnvironment(env) {
+      //getAvailableMerchants(env);
+    //}
+
+    function addAmount(amount) {
+      var input = document.getElementById('amount-input');
+      var button = document.getElementsByClassName('trw-button-active');
+      input.value = amount;
+      for(var i=0; i< button.length; i++) {
+        button[i].setAttribute('data-amount', amount * 100);
+      }
+    };
+
+    function addMerchantReference(text) {
+      var button = document.getElementsByClassName('trw-button-active');
+      for(var i=0; i< button.length; i++) {
+        button[i].setAttribute('data-merchant-reference', text + i);
+      }
+    };
+
+    function getRandom(min, max) {
+      var r =  (+(Math.random() * (max - min)) + +min).toFixed(2);
+      return Math.round(r * 100) / 100;
+    };
+
+    function getRandomText() {
+      var text = "MERCHANT";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+      for (var i = 0; i < 5; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+      return text;
+    };
+
+    function initialize() {
+      addAmount(getRandom(0.5, 3));
+      addMerchantReference(getRandomText());
+      //selectEnvironment('local');
+    };
+
+    window.setTimeout(initialize(), 500);
+  </script>
+</body>
+
+</html>
